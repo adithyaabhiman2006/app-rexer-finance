@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">REXER Hub</string>
+    <string name="dashboard_title">REXER Hub</string>
+    <string name="daily_spending_gauge">Daily Spending Gauge</string>
+    <string name="log_expense">Log Expense</string>
+    <string name="goals_title">Target Goals</string>
+    <string name="reminders_title">Smart Reminders</string>
+    <string name="ai_coach_title">AI Coach</string>
+</resources>
+

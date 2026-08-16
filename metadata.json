@@ -1,0 +1,7 @@
+{
+  "name": "REXER Hub",
+  "description": "Daily financial tracker, circular spending dial, goal manager, smart schedule reminders, and Gemini AI personal coach for engineers and creators.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
