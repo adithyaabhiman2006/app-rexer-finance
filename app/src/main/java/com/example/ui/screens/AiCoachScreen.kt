@@ -2,6 +2,7 @@ package com.example.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,10 +22,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.DeleteSweep
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -49,16 +52,21 @@ import androidx.compose.ui.unit.sp
 import com.example.data.local.entity.CoachMessageEntity
 import com.example.data.local.entity.GoalEntity
 import com.example.ui.theme.CarbonBlack
+import com.example.ui.theme.CarbonDark
 import com.example.ui.theme.CyberCyan
 import com.example.ui.theme.ElectricAmber
 import com.example.ui.theme.EmeraldNeon
 import com.example.ui.theme.NeonRed
+import com.example.ui.theme.PurpleNeon
 import com.example.ui.theme.SurfaceBorder
+import com.example.ui.theme.SurfaceBorderBright
 import com.example.ui.theme.SurfaceDark
 import com.example.ui.theme.SurfaceElevated
+import com.example.ui.theme.SurfaceHighlight
 import com.example.ui.theme.TextMuted
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
+import com.example.ui.theme.VividViolet
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -79,11 +87,11 @@ fun AiCoachScreen(
     val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
 
     val promptSuggestions = listOf(
-        "🏍️ How to fund R15 V4 mods in 30 days?",
-        "📈 XAU/USD Trading session & risk plan",
-        "🎨 Figma client deliverable sprint",
-        "⚡ Audit today's ₹${todaySpent.toInt()} burn rate",
-        "💡 Give me a high-impact daily mindset nudge"
+        "🏍️ How to fund R15 V4 mods faster?",
+        "📈 Trading risk management plan",
+        "🎯 Cut today's budget pace",
+        "⚡ 3-step high focus plan for today",
+        "💡 Give me a tactical burndown advice"
     )
 
     // Auto-scroll to bottom on new message
@@ -99,7 +107,7 @@ fun AiCoachScreen(
             .background(CarbonBlack)
             .testTag("ai_coach_screen")
     ) {
-        // Header
+        // Futuristic Top Bar
         Surface(
             modifier = Modifier.fillMaxWidth(),
             color = SurfaceDark,
@@ -114,8 +122,12 @@ fun AiCoachScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(36.dp)
-                                .background(NeonRed.copy(alpha = 0.2f), CircleShape),
+                                .size(38.dp)
+                                .background(
+                                    Brush.linearGradient(listOf(NeonRed.copy(alpha = 0.25f), VividViolet.copy(alpha = 0.25f))),
+                                    CircleShape
+                                )
+                                .border(1.dp, NeonRed.copy(alpha = 0.5f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -129,34 +141,35 @@ fun AiCoachScreen(
                         Spacer(modifier = Modifier.width(10.dp))
 
                         Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "COACH REXER",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Black,
+                                    color = TextPrimary
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .background(EmeraldNeon.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
+                                        .padding(horizontal = 5.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = "AI ACTIVE",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = EmeraldNeon,
+                                        fontSize = 8.sp
+                                    )
+                                }
+                            }
                             Text(
-                                text = "COACH REXER",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Black,
-                                color = TextPrimary
-                            )
-                            Text(
-                                text = "Gemini 3.5 Flash Financial & Mindset Strategist",
+                                text = "Gemini Flash Financial & Performance Strategist",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontSize = 10.sp,
                                 color = CyberCyan
                             )
                         }
-                    }
-
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = EmeraldNeon.copy(alpha = 0.15f),
-                        border = BorderStroke(1.dp, EmeraldNeon.copy(alpha = 0.4f))
-                    ) {
-                        Text(
-                            text = "LIVE SYNC",
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = EmeraldNeon,
-                            fontSize = 9.sp,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
-                        )
                     }
                 }
 
@@ -169,46 +182,32 @@ fun AiCoachScreen(
                 ) {
                     val percent = if (dailyLimit > 0) ((todaySpent / dailyLimit) * 100).toInt() else 0
                     Surface(
-                        shape = RoundedCornerShape(6.dp),
-                        color = SurfaceElevated
+                        shape = RoundedCornerShape(8.dp),
+                        color = SurfaceElevated,
+                        border = BorderStroke(1.dp, SurfaceBorder)
                     ) {
                         Text(
-                            text = "Spend: $percent% ($currencySymbol${todaySpent.toInt()}/$currencySymbol${dailyLimit.toInt()})",
+                            text = "Pace: $percent% ($currencySymbol${todaySpent.toInt()} / $currencySymbol${dailyLimit.toInt()})",
                             style = MaterialTheme.typography.labelMedium,
-                            fontSize = 9.sp,
+                            fontSize = 10.sp,
                             color = if (percent > 100) NeonRed else CyberCyan,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                         )
                     }
 
                     val r15 = goals.find { it.title.contains("R15", ignoreCase = true) }
                     if (r15 != null) {
                         Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = SurfaceElevated
+                            shape = RoundedCornerShape(8.dp),
+                            color = SurfaceElevated,
+                            border = BorderStroke(1.dp, SurfaceBorder)
                         ) {
                             Text(
                                 text = "R15: ${((r15.currentAmount / r15.targetAmount) * 100).toInt()}%",
                                 style = MaterialTheme.typography.labelMedium,
-                                fontSize = 9.sp,
+                                fontSize = 10.sp,
                                 color = NeonRed,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
-                    }
-
-                    val xau = goals.find { it.title.contains("XAU", ignoreCase = true) }
-                    if (xau != null) {
-                        Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = SurfaceElevated
-                        ) {
-                            Text(
-                                text = "XAU: $currencySymbol${xau.currentAmount.toInt()}",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontSize = 9.sp,
-                                color = ElectricAmber,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                             )
                         }
                     }
@@ -242,7 +241,7 @@ fun AiCoachScreen(
                         color = if (isUser) NeonRed else SurfaceDark,
                         border = BorderStroke(
                             1.dp,
-                            if (isUser) NeonRed else SurfaceBorder
+                            if (isUser) NeonRed else SurfaceBorderBright.copy(alpha = 0.5f)
                         ),
                         modifier = Modifier.fillMaxWidth(0.88f)
                     ) {
@@ -257,13 +256,13 @@ fun AiCoachScreen(
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 10.sp,
-                                    color = if (isUser) Color.White.copy(alpha = 0.8f) else CyberCyan
+                                    color = if (isUser) Color.White.copy(alpha = 0.85f) else CyberCyan
                                 )
                                 Text(
                                     text = timeFormat.format(Date(msg.timestamp)),
                                     style = MaterialTheme.typography.labelMedium,
                                     fontSize = 9.sp,
-                                    color = if (isUser) Color.White.copy(alpha = 0.6f) else TextMuted
+                                    color = if (isUser) Color.White.copy(alpha = 0.65f) else TextMuted
                                 )
                             }
 
@@ -290,7 +289,7 @@ fun AiCoachScreen(
                         Surface(
                             shape = RoundedCornerShape(16.dp),
                             color = SurfaceDark,
-                            border = BorderStroke(1.dp, NeonRed.copy(alpha = 0.4f))
+                            border = BorderStroke(1.dp, CyberCyan.copy(alpha = 0.4f))
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -298,7 +297,7 @@ fun AiCoachScreen(
                             ) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(16.dp),
-                                    color = NeonRed,
+                                    color = CyberCyan,
                                     strokeWidth = 2.dp
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
@@ -345,7 +344,7 @@ fun AiCoachScreen(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 80.dp),
+                .padding(bottom = 84.dp),
             color = SurfaceDark,
             border = BorderStroke(1.dp, SurfaceBorder)
         ) {
@@ -358,14 +357,14 @@ fun AiCoachScreen(
                 OutlinedTextField(
                     value = queryText,
                     onValueChange = { queryText = it },
-                    placeholder = { Text("Ask about spending, goals, or trading...", fontSize = 12.sp) },
+                    placeholder = { Text("Ask about spending, goals, or trading...", fontSize = 12.sp, color = TextMuted) },
                     singleLine = true,
                     modifier = Modifier
                         .weight(1f)
                         .testTag("coach_input_field"),
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = NeonRed,
+                        focusedBorderColor = CyberCyan,
                         unfocusedBorderColor = SurfaceBorder,
                         focusedContainerColor = SurfaceElevated,
                         unfocusedContainerColor = SurfaceElevated,
@@ -394,7 +393,7 @@ fun AiCoachScreen(
                         .testTag("coach_send_btn")
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Send,
+                        imageVector = Icons.AutoMirrored.Filled.Send,
                         contentDescription = "Send",
                         tint = if (queryText.isNotBlank() && !isGenerating) Color.White else TextMuted,
                         modifier = Modifier.size(18.dp)

@@ -58,6 +58,8 @@ import com.example.ui.theme.TextMuted
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
 
+import com.example.util.CurrencyHelper
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuickExpenseSheet(
@@ -82,7 +84,7 @@ fun QuickExpenseSheet(
         "Lifestyle"
     )
 
-    val quickAddAmounts = listOf(50, 100, 200, 500, 1000, 2000)
+    val quickAddAmounts = CurrencyHelper.getQuickExpensePresets(currencySymbol)
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 

@@ -1,9 +1,13 @@
 package com.example
 
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -24,17 +28,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
+import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.NotificationsActive
-import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Flag
-import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -47,6 +51,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,12 +61,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.local.entity.GoalEntity
+import com.example.receiver.NotificationHelper
 import com.example.ui.components.AdjustLimitDialog
+import com.example.ui.components.CurrencyPickerDialog
 import com.example.ui.components.DepositDialog
 import com.example.ui.components.PinLockScreen
 import com.example.ui.components.ProfileAuthDialog
@@ -93,7 +101,7 @@ enum class NavigationTab(
 ) {
     DASHBOARD("Dashboard", Icons.Filled.Speed, Icons.Outlined.Speed),
     GOALS("Goals", Icons.Filled.Flag, Icons.Outlined.Flag),
-    FINANCE("Finance", Icons.Filled.ReceiptLong, Icons.Outlined.ReceiptLong),
+    FINANCE("Finance", Icons.AutoMirrored.Filled.ReceiptLong, Icons.AutoMirrored.Outlined.ReceiptLong),
     SCHEDULE("Schedule", Icons.Filled.CalendarMonth, Icons.Outlined.CalendarMonth),
     AI_COACH("Coach", Icons.Filled.AutoAwesome, Icons.Outlined.AutoAwesome)
 }
@@ -114,10 +122,24 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun RexerAppContent(viewModel: RexerViewModel) {
+    val context = LocalContext.current
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { /* Result handled */ }
+    )
+
+    LaunchedEffect(Unit) {
+        NotificationHelper.createNotificationChannel(context)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
     var selectedTab by remember { mutableStateOf(NavigationTab.DASHBOARD) }
     var showQuickExpenseSheet by remember { mutableStateOf(false) }
     var showAdjustLimitDialog by remember { mutableStateOf(false) }
     var showProfileAuthDialog by remember { mutableStateOf(false) }
+    var showCurrencyDialog by remember { mutableStateOf(false) }
     var isAppUnlocked by remember { mutableStateOf(false) }
     var targetGoalForContribution by remember { mutableStateOf<GoalEntity?>(null) }
 
@@ -132,7 +154,7 @@ fun RexerAppContent(viewModel: RexerViewModel) {
     val allCoachMessages by viewModel.allCoachMessages.collectAsState()
     val isGeneratingCoach by viewModel.isGeneratingCoach.collectAsState()
 
-    val currencySymbol = userSettings?.currencySymbol ?: "₹"
+    val currencySymbol = userSettings?.currencySymbol ?: "$"
     val dailyLimit = userSettings?.dailyBudgetLimit ?: 3000.0
 
     val requiresPinLock = userSettings?.isPinAuthEnabled == true && !isAppUnlocked && !userSettings?.pinCode.isNullOrBlank()
@@ -239,7 +261,8 @@ fun RexerAppContent(viewModel: RexerViewModel) {
                             onNavigateToGoals = { selectedTab = NavigationTab.GOALS },
                             onNavigateToReminders = { selectedTab = NavigationTab.SCHEDULE },
                             onNavigateToFinance = { selectedTab = NavigationTab.FINANCE },
-                            onOpenProfileAuth = { showProfileAuthDialog = true }
+                            onOpenProfileAuth = { showProfileAuthDialog = true },
+                            onOpenCurrencyPicker = { showCurrencyDialog = true }
                         )
                     }
 
@@ -264,7 +287,8 @@ fun RexerAppContent(viewModel: RexerViewModel) {
                             currencySymbol = currencySymbol,
                             onOpenQuickExpense = { showQuickExpenseSheet = true },
                             onOpenAdjustLimit = { showAdjustLimitDialog = true },
-                            onDeleteTransaction = { id -> viewModel.deleteExpense(id) }
+                            onDeleteTransaction = { id -> viewModel.deleteExpense(id) },
+                            onOpenCurrencyPicker = { showCurrencyDialog = true }
                         )
                     }
 
@@ -315,6 +339,18 @@ fun RexerAppContent(viewModel: RexerViewModel) {
                     onConfirmLimit = { newLimit ->
                         viewModel.updateDailyLimit(newLimit)
                         showAdjustLimitDialog = false
+                    }
+                )
+            }
+
+            // Currency Switcher Dialog
+            if (showCurrencyDialog) {
+                CurrencyPickerDialog(
+                    currentCurrency = currencySymbol,
+                    onDismiss = { showCurrencyDialog = false },
+                    onSelectCurrency = { newCurrency ->
+                        viewModel.updateCurrency(newCurrency)
+                        showCurrencyDialog = false
                     }
                 )
             }

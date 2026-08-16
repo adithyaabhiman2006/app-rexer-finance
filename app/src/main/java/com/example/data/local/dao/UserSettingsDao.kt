@@ -25,6 +25,9 @@ interface UserSettingsDao {
     @Query("UPDATE user_settings SET dailyBudgetLimit = :limit WHERE id = 1")
     suspend fun updateDailyLimit(limit: Double)
 
+    @Query("UPDATE user_settings SET currencySymbol = :currency WHERE id = 1")
+    suspend fun updateCurrency(currency: String)
+
     @Query("UPDATE user_settings SET isAppLocked = :locked WHERE id = 1")
     suspend fun setAppLocked(locked: Boolean)
 

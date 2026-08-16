@@ -2,6 +2,7 @@ package com.example.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,34 +21,30 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.CurrencyExchange
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.ReceiptLong
+import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
@@ -69,9 +66,12 @@ import com.example.ui.theme.CyberCyan
 import com.example.ui.theme.ElectricAmber
 import com.example.ui.theme.EmeraldNeon
 import com.example.ui.theme.NeonRed
+import com.example.ui.theme.PurpleNeon
 import com.example.ui.theme.SurfaceBorder
+import com.example.ui.theme.SurfaceBorderBright
 import com.example.ui.theme.SurfaceDark
 import com.example.ui.theme.SurfaceElevated
+import com.example.ui.theme.SurfaceHighlight
 import com.example.ui.theme.TextMuted
 import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
@@ -104,6 +104,7 @@ fun DashboardScreen(
     onNavigateToReminders: () -> Unit,
     onNavigateToFinance: () -> Unit,
     onOpenProfileAuth: () -> Unit,
+    onOpenCurrencyPicker: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val formatter = NumberFormat.getNumberInstance(Locale.getDefault())
@@ -115,10 +116,10 @@ fun DashboardScreen(
             .fillMaxSize()
             .background(CarbonBlack)
             .testTag("dashboard_screen"),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 96.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 100.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
-        // Top App Header
+        // App Bar Header
         item {
             Row(
                 modifier = Modifier
@@ -137,68 +138,107 @@ fun DashboardScreen(
                             letterSpacing = (-0.5).sp
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = SurfaceElevated,
-                            border = BorderStroke(1.dp, SurfaceBorder)
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    Brush.horizontalGradient(
+                                        listOf(CyberCyan.copy(alpha = 0.2f), CyberCyan.copy(alpha = 0.05f))
+                                    ),
+                                    RoundedCornerShape(6.dp)
+                                )
+                                .border(1.dp, CyberCyan.copy(alpha = 0.4f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 7.dp, vertical = 2.dp)
                         ) {
                             Text(
-                                text = "HUB",
+                                text = "PRO",
                                 style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.Black,
                                 color = CyberCyan,
-                                fontSize = 11.sp,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                fontSize = 10.sp
                             )
                         }
                     }
                     Text(
-                        text = "$currentDateStr • ${userSettings?.userRole ?: "Engineer & Creator"}",
+                        text = "$currentDateStr • ${userSettings?.userRole ?: "Founder & Trader"}",
                         style = MaterialTheme.typography.labelMedium,
                         color = TextMuted,
                         fontSize = 11.sp
                     )
                 }
 
-                // Profile & Security Lock Badge
-                Surface(
-                    onClick = onOpenProfileAuth,
-                    shape = RoundedCornerShape(14.dp),
-                    color = SurfaceDark,
-                    border = BorderStroke(1.dp, SurfaceBorder),
-                    modifier = Modifier.testTag("profile_btn")
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    // Currency Switcher Quick Badge
+                    Surface(
+                        onClick = onOpenCurrencyPicker,
+                        shape = RoundedCornerShape(14.dp),
+                        color = SurfaceDark,
+                        border = BorderStroke(1.dp, CyberCyan.copy(alpha = 0.4f)),
+                        modifier = Modifier.testTag("currency_picker_btn")
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .background(NeonRed.copy(alpha = 0.2f), CircleShape),
-                            contentAlignment = Alignment.Center
+                        Row(
+                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 7.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = if (userSettings?.isPinAuthEnabled == true) Icons.Default.Lock else Icons.Default.Person,
-                                contentDescription = "Profile",
-                                tint = NeonRed,
-                                modifier = Modifier.size(14.dp)
+                                imageVector = Icons.Default.CurrencyExchange,
+                                contentDescription = "Currency",
+                                tint = CyberCyan,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Text(
+                                text = currencySymbol,
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Black,
+                                color = CyberCyan,
+                                fontSize = 12.sp
                             )
                         }
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = userSettings?.userName ?: "REXER",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary,
-                            fontSize = 12.sp
-                        )
+                    }
+
+                    // Profile & Security Lock Badge
+                    Surface(
+                        onClick = onOpenProfileAuth,
+                        shape = RoundedCornerShape(14.dp),
+                        color = SurfaceDark,
+                        border = BorderStroke(1.dp, SurfaceBorderBright.copy(alpha = 0.5f)),
+                        modifier = Modifier.testTag("profile_btn")
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 11.dp, vertical = 7.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(22.dp)
+                                    .background(NeonRed.copy(alpha = 0.2f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = if (userSettings?.isPinAuthEnabled == true) Icons.Default.Lock else Icons.Default.Person,
+                                    contentDescription = "Profile",
+                                    tint = NeonRed,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(7.dp))
+                            Text(
+                                text = userSettings?.userName ?: "REXER",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary,
+                                fontSize = 12.sp
+                            )
+                        }
                     }
                 }
             }
         }
 
-        // 1. Main Highlight: Circular Dial Layout with Perimeter Ticks and Red Indicator
+        // 1. Primary Highlight: Circular Speedometer Gauge Dial
         item {
             SpendingDialGauge(
                 todaySpent = todaySpent,
@@ -222,6 +262,7 @@ fun DashboardScreen(
                         containerColor = NeonRed,
                         contentColor = Color.White
                     ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp),
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp)
@@ -230,7 +271,7 @@ fun DashboardScreen(
                     Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Log Expense",
+                        text = "Quick Expense",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp
@@ -261,7 +302,7 @@ fun DashboardScreen(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Ask Coach",
+                            text = "AI Strategy",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary,
@@ -290,27 +331,47 @@ fun DashboardScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Flag,
-                        contentDescription = null,
-                        tint = NeonRed,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .background(NeonRed.copy(alpha = 0.15f), RoundedCornerShape(6.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Flag,
+                            contentDescription = null,
+                            tint = NeonRed,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "TARGET GOALS",
+                        text = "CAPITAL GOALS",
                         style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Black,
                         color = TextPrimary,
                         letterSpacing = 1.sp
                     )
                 }
 
-                Text(
-                    text = "View All (${goals.size}) >",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = CyberCyan,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.clickable { onNavigateToGoals() }
-                )
+                ) {
+                    Text(
+                        text = "All (${goals.size})",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = CyberCyan
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                        contentDescription = null,
+                        tint = CyberCyan,
+                        modifier = Modifier.size(10.dp)
+                    )
+                }
             }
         }
 
@@ -323,7 +384,7 @@ fun DashboardScreen(
             )
         }
 
-        // 4. Smart Reminders & Schedule Section (Google Tasks & Calendar)
+        // 4. Smart Reminders & Schedule Section
         item {
             Spacer(modifier = Modifier.height(4.dp))
             Row(
@@ -332,27 +393,47 @@ fun DashboardScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = null,
-                        tint = CyberCyan,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .background(CyberCyan.copy(alpha = 0.15f), RoundedCornerShape(6.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Notifications,
+                            contentDescription = null,
+                            tint = CyberCyan,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "TODAY'S SCHEDULE & ALERTS",
+                        text = "UPCOMING SCHEDULE",
                         style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Black,
                         color = TextPrimary,
                         letterSpacing = 1.sp
                     )
                 }
 
-                Text(
-                    text = "Manage Tasks >",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = CyberCyan,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.clickable { onNavigateToReminders() }
-                )
+                ) {
+                    Text(
+                        text = "Timeline",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = CyberCyan
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                        contentDescription = null,
+                        tint = CyberCyan,
+                        modifier = Modifier.size(10.dp)
+                    )
+                }
             }
         }
 
@@ -374,27 +455,47 @@ fun DashboardScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.ReceiptLong,
-                        contentDescription = null,
-                        tint = ElectricAmber,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .background(ElectricAmber.copy(alpha = 0.15f), RoundedCornerShape(6.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ReceiptLong,
+                            contentDescription = null,
+                            tint = ElectricAmber,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "TODAY'S LOGS (${todayTransactions.size})",
+                        text = "TODAY'S TRANSACTIONS",
                         style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Black,
                         color = TextPrimary,
                         letterSpacing = 1.sp
                     )
                 }
 
-                Text(
-                    text = "History >",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = CyberCyan,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.clickable { onNavigateToFinance() }
-                )
+                ) {
+                    Text(
+                        text = "History",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = CyberCyan
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                        contentDescription = null,
+                        tint = CyberCyan,
+                        modifier = Modifier.size(10.dp)
+                    )
+                }
             }
         }
 
@@ -402,25 +503,26 @@ fun DashboardScreen(
             item {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(18.dp),
                     color = SurfaceDark,
                     border = BorderStroke(1.dp, SurfaceBorder)
                 ) {
                     Column(
-                        modifier = Modifier.padding(20.dp),
+                        modifier = Modifier.padding(22.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "No expenses logged today yet.",
+                            text = "No outlays recorded today yet.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = TextSecondary
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         OutlinedButton(
                             onClick = onOpenQuickExpense,
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(10.dp),
+                            border = BorderStroke(1.dp, NeonRed.copy(alpha = 0.5f))
                         ) {
-                            Text("Log First Expense", color = NeonRed)
+                            Text("Log Outflow", color = NeonRed, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -440,25 +542,41 @@ fun DashboardScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
-                            Text(
-                                text = tx.title,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = TextPrimary
-                            )
-                            Text(
-                                text = "${tx.category} ${if (tx.note.isNotBlank()) "• ${tx.note}" else ""}",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = TextMuted,
-                                fontSize = 11.sp
-                            )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .background(SurfaceElevated, RoundedCornerShape(10.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.TrendingDown,
+                                    contentDescription = null,
+                                    tint = NeonRed,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = tx.title,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary
+                                )
+                                Text(
+                                    text = "${tx.category} ${if (tx.note.isNotBlank()) "• ${tx.note}" else ""}",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = TextMuted,
+                                    fontSize = 11.sp
+                                )
+                            }
                         }
 
                         Text(
                             text = "-$currencySymbol${formatter.format(tx.amount.toInt())}",
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.ExtraBold,
                             color = NeonRed
                         )
                     }

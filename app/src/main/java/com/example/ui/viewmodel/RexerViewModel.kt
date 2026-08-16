@@ -12,6 +12,7 @@ import com.example.data.local.entity.UserSettingsEntity
 import com.example.data.remote.GeminiCoachService
 import com.example.data.repository.RexerRepository
 import com.example.receiver.NotificationHelper
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -71,6 +72,10 @@ class RexerViewModel(application: Application) : AndroidViewModel(application) {
 
         latestNudge = repository.latestNudge
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.ensureInitialDataSeeded()
+        }
     }
 
     fun addExpense(
@@ -174,6 +179,12 @@ class RexerViewModel(application: Application) : AndroidViewModel(application) {
     fun updateDailyLimit(newLimit: Double) {
         viewModelScope.launch {
             repository.updateDailyLimit(newLimit)
+        }
+    }
+
+    fun updateCurrency(currency: String) {
+        viewModelScope.launch {
+            repository.updateCurrency(currency)
         }
     }
 

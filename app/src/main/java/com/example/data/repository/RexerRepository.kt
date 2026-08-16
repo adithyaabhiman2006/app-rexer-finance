@@ -110,6 +110,9 @@ class RexerRepository(private val database: AppDatabase) {
     suspend fun updateDailyLimit(newLimit: Double) =
         userSettingsDao.updateDailyLimit(newLimit)
 
+    suspend fun updateCurrency(currency: String) =
+        userSettingsDao.updateCurrency(currency)
+
     suspend fun updateSettings(settings: UserSettingsEntity) =
         userSettingsDao.update(settings)
 
@@ -118,4 +121,15 @@ class RexerRepository(private val database: AppDatabase) {
 
     suspend fun setPinAuth(pin: String, enabled: Boolean) =
         userSettingsDao.setPinAuth(pin, enabled)
+
+    suspend fun ensureInitialDataSeeded() {
+        try {
+            val settings = userSettingsDao.getUserSettingsDirect()
+            if (settings == null) {
+                AppDatabase.populateInitialData(database)
+            }
+        } catch (e: Exception) {
+            // Ignore seeding errors
+        }
+    }
 }
